@@ -8,7 +8,7 @@ import IngredientManager from '@/components/IngredientManager'
 import RecipeSearch from '@/components/RecipeSearch'
 import ShoppingListManager from '@/components/ShoppingListManager'
 import FavoriteRecipesManager from '@/components/FavoriteRecipesManager'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Package, Search, ShoppingCart, Heart } from 'lucide-react'
 
 // Props interfaces
@@ -37,6 +37,23 @@ export default function HomePage() {
     shopping: false,
     favorites: false
   })
+
+  // sessionStorageからactiveTabを復元
+  useEffect(() => {
+    try {
+      const savedActiveTab = sessionStorage.getItem('activeTab')
+      if (savedActiveTab && ['ingredients', 'recipes', 'shopping', 'favorites'].includes(savedActiveTab)) {
+        setActiveTab(savedActiveTab as TabType)
+      }
+    } catch (error) {
+      console.error('Failed to restore activeTab from sessionStorage:', error)
+    }
+  }, [])
+
+  // activeTabが変更された時にsessionStorageに保存
+  useEffect(() => {
+    sessionStorage.setItem('activeTab', activeTab)
+  }, [activeTab])
 
   // 材料データの取得
   const fetchIngredients = useCallback(async (force = false) => {
@@ -199,37 +216,44 @@ export default function HomePage() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="ingredients" className="mt-4 sm:mt-6">
-            <IngredientManager 
-              ingredients={ingredients}
-              loading={loadingStates.ingredients}
-              onRefresh={refreshIngredients}
-            />
-          </TabsContent>
+          {/* コンテンツエリア - 条件付きレンダリングで状態保持 */}
+          <div className="mt-4 sm:mt-6">
+            {/* 材料管理 */}
+            <div className={activeTab === 'ingredients' ? 'block' : 'hidden'}>
+              <IngredientManager 
+                ingredients={ingredients}
+                loading={loadingStates.ingredients}
+                onRefresh={refreshIngredients}
+              />
+            </div>
 
-          <TabsContent value="recipes" className="mt-4 sm:mt-6">
-            <RecipeSearch 
-              ingredients={ingredients} 
-              onFavoriteChange={refreshFavorites}
-            />
-          </TabsContent>
+            {/* レシピ検索 - 常にマウント、表示/非表示のみ制御 */}
+            <div className={activeTab === 'recipes' ? 'block' : 'hidden'}>
+              <RecipeSearch 
+                ingredients={ingredients} 
+                onFavoriteChange={refreshFavorites}
+              />
+            </div>
 
-          <TabsContent value="shopping" className="mt-4 sm:mt-6">
-            <ShoppingListManager 
-              shoppingLists={shoppingLists}
-              loading={loadingStates.shopping}
-              onRefresh={refreshShoppingLists}
-            />
-          </TabsContent>
+            {/* 買い物リスト */}
+            <div className={activeTab === 'shopping' ? 'block' : 'hidden'}>
+              <ShoppingListManager 
+                shoppingLists={shoppingLists}
+                loading={loadingStates.shopping}
+                onRefresh={refreshShoppingLists}
+              />
+            </div>
 
-          <TabsContent value="favorites" className="mt-4 sm:mt-6">
-            <FavoriteRecipesManager 
-              favorites={favorites}
-              loading={loadingStates.favorites}
-              onRefresh={refreshFavorites}
-              onTabChange={handleTabChange}
-            />
-          </TabsContent>
+            {/* お気に入り */}
+            <div className={activeTab === 'favorites' ? 'block' : 'hidden'}>
+              <FavoriteRecipesManager 
+                favorites={favorites}
+                loading={loadingStates.favorites}
+                onRefresh={refreshFavorites}
+                onTabChange={handleTabChange}
+              />
+            </div>
+          </div>
         </Tabs>
       </div>
     </Layout>
