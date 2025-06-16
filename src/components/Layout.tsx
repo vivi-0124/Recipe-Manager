@@ -1,20 +1,26 @@
-'use client'
+'use client';
 
-import { useAuth } from '@/hooks/useAuth'
-import AuthForm from './AuthForm'
-import { Button } from '@/components/ui/button'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { ChefHat, LogOut, Loader2 } from 'lucide-react'
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
-import { Menu } from 'lucide-react'
-import { Separator } from '@/components/ui/separator'
+import { useAuth } from '@/hooks/useAuth';
+import AuthForm from './AuthForm';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { ChefHat, LogOut, Loader2 } from 'lucide-react';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
+import { Menu } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
 
 interface LayoutProps {
-  children: React.ReactNode
+  children: React.ReactNode;
 }
 
 export default function Layout({ children }: LayoutProps) {
-  const { user, loading } = useAuth()
+  const { user, loading } = useAuth();
 
   if (loading) {
     return (
@@ -24,11 +30,11 @@ export default function Layout({ children }: LayoutProps) {
           <p className="text-muted-foreground text-sm">読み込み中...</p>
         </div>
       </div>
-    )
+    );
   }
 
   if (!user) {
-    return <AuthForm />
+    return <AuthForm />;
   }
 
   return (
@@ -89,9 +95,9 @@ export default function Layout({ children }: LayoutProps) {
                         </p>
                       </div>
                     </div>
-                    
+
                     <Separator />
-                    
+
                     {/* サインアウトボタン */}
                     <div className="px-2">
                       <SignOutButton />
@@ -106,9 +112,7 @@ export default function Layout({ children }: LayoutProps) {
 
       {/* メインコンテンツ - モバイル優先パディング */}
       <main className="px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          {children}
-        </div>
+        <div className="max-w-7xl mx-auto">{children}</div>
       </main>
 
       {/* フッター - モバイルでコンパクト */}
@@ -130,25 +134,25 @@ export default function Layout({ children }: LayoutProps) {
         </div>
       </footer>
     </div>
-  )
+  );
 }
 
 function SignOutButton() {
-  const { signOut } = useAuth()
+  const { signOut } = useAuth();
 
   const handleSignOut = async () => {
-    await signOut()
-  }
+    await signOut();
+  };
 
   return (
-    <Button 
+    <Button
       onClick={handleSignOut}
-      variant="outline" 
+      variant="outline"
       size="sm"
       className="w-full lg:w-auto text-destructive border-destructive hover:bg-destructive hover:text-destructive-foreground"
     >
       <LogOut className="mr-2 h-4 w-4" />
       ログアウト
     </Button>
-  )
-} 
+  );
+}

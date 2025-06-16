@@ -1,8 +1,8 @@
-'use client'
+'use client';
 
-import { useState, useRef, useEffect } from 'react'
-import { useAuth } from '@/hooks/useAuth'
-import { ShoppingList } from '@/lib/supabase'
+import { useState, useRef, useEffect } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { ShoppingList } from '@/lib/supabase';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,48 +13,48 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
-import { Trash2, ShoppingCart, Plus } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
+} from '@/components/ui/alert-dialog';
+import { Trash2, ShoppingCart, Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface ShoppingListManagerProps {
-  shoppingLists?: ShoppingList[]
-  loading?: boolean
-  onRefresh?: () => void
+  shoppingLists?: ShoppingList[];
+  loading?: boolean;
+  onRefresh?: () => void;
 }
 
-export default function ShoppingListManager({ 
-  shoppingLists = [], 
-  loading = false, 
-  onRefresh 
+export default function ShoppingListManager({
+  shoppingLists = [],
+  loading = false,
+  onRefresh,
 }: ShoppingListManagerProps = {}) {
-  const { user } = useAuth()
-  const [showForm, setShowForm] = useState(false)
+  const { user } = useAuth();
+  const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     ingredient_name: '',
     quantity: '',
     unit: '',
     priority: 1,
     notes: '',
-  })
-  const nameInputRef = useRef<HTMLInputElement>(null)
+  });
+  const nameInputRef = useRef<HTMLInputElement>(null);
 
   // フォームが表示されたときに最初のinputにフォーカス
   useEffect(() => {
     if (showForm && nameInputRef.current) {
       setTimeout(() => {
-        nameInputRef.current?.focus()
-      }, 100) // アニメーションが完了するまで少し待つ
+        nameInputRef.current?.focus();
+      }, 100); // アニメーションが完了するまで少し待つ
     }
-  }, [showForm])
+  }, [showForm]);
 
   // アイテムの追加
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!user) return
+    e.preventDefault();
+    if (!user) return;
 
-    console.log('Adding shopping list item:', formData.ingredient_name) // デバッグ用
+    console.log('Adding shopping list item:', formData.ingredient_name); // デバッグ用
     try {
       const response = await fetch('/api/shopping-lists', {
         method: 'POST',
@@ -65,13 +65,13 @@ export default function ShoppingListManager({
           ...formData,
           user_id: user.id,
         }),
-      })
+      });
 
-      console.log('Add response status:', response.status) // デバッグ用
+      console.log('Add response status:', response.status); // デバッグ用
       if (response.ok) {
-        console.log('Add successful, calling onRefresh') // デバッグ用
+        console.log('Add successful, calling onRefresh'); // デバッグ用
         if (onRefresh) {
-          onRefresh()
+          onRefresh();
         }
         setFormData({
           ingredient_name: '',
@@ -79,24 +79,31 @@ export default function ShoppingListManager({
           unit: '',
           priority: 1,
           notes: '',
-        })
-        setShowForm(false)
+        });
+        setShowForm(false);
       } else {
-        const errorData = await response.json()
-        console.error('アイテムの追加に失敗しました:', errorData.error)
-        alert(`エラー: ${errorData.error}`)
+        const errorData = await response.json();
+        console.error('アイテムの追加に失敗しました:', errorData.error);
+        alert(`エラー: ${errorData.error}`);
       }
     } catch (error) {
-      console.error('アイテムの追加に失敗しました:', error)
-      alert('アイテムの追加に失敗しました')
+      console.error('アイテムの追加に失敗しました:', error);
+      alert('アイテムの追加に失敗しました');
     }
-  }
+  };
 
   // 購入状態の切り替え
   const togglePurchased = async (id: string, isPurchased: boolean) => {
-    if (!user) return
+    if (!user) return;
 
-    console.log('Toggling purchased status for item:', id, 'from', isPurchased, 'to', !isPurchased) // デバッグ用
+    console.log(
+      'Toggling purchased status for item:',
+      id,
+      'from',
+      isPurchased,
+      'to',
+      !isPurchased
+    ); // デバッグ用
     try {
       const response = await fetch(`/api/shopping-lists/${id}`, {
         method: 'PATCH',
@@ -107,53 +114,56 @@ export default function ShoppingListManager({
           is_purchased: !isPurchased,
           user_id: user.id,
         }),
-      })
+      });
 
-      console.log('Toggle response status:', response.status) // デバッグ用
+      console.log('Toggle response status:', response.status); // デバッグ用
       if (response.ok) {
-        console.log('Toggle successful, calling onRefresh') // デバッグ用
+        console.log('Toggle successful, calling onRefresh'); // デバッグ用
         if (onRefresh) {
-          onRefresh()
+          onRefresh();
         }
       } else {
-        console.error('購入状態の更新に失敗しました:', response.status)
+        console.error('購入状態の更新に失敗しました:', response.status);
       }
     } catch (error) {
-      console.error('購入状態の更新に失敗しました:', error)
+      console.error('購入状態の更新に失敗しました:', error);
     }
-  }
+  };
 
   // アイテムの削除
   const handleDelete = async (id: string) => {
-    if (!user) return
+    if (!user) return;
 
-    console.log('Deleting shopping list item:', id) // デバッグ用
+    console.log('Deleting shopping list item:', id); // デバッグ用
     try {
-      const response = await fetch(`/api/shopping-lists/${id}?userId=${user.id}`, {
-        method: 'DELETE',
-      })
+      const response = await fetch(
+        `/api/shopping-lists/${id}?userId=${user.id}`,
+        {
+          method: 'DELETE',
+        }
+      );
 
-      console.log('Delete response status:', response.status) // デバッグ用
+      console.log('Delete response status:', response.status); // デバッグ用
       if (response.ok) {
-        console.log('Delete successful, calling onRefresh') // デバッグ用
+        console.log('Delete successful, calling onRefresh'); // デバッグ用
         if (onRefresh) {
-          onRefresh()
+          onRefresh();
         }
       } else {
-        console.error('アイテムの削除に失敗しました:', response.status)
+        console.error('アイテムの削除に失敗しました:', response.status);
       }
     } catch (error) {
-      console.error('アイテムの削除に失敗しました:', error)
+      console.error('アイテムの削除に失敗しました:', error);
     }
-  }
+  };
 
   // 購入済みアイテムを一括削除
   const clearPurchased = async () => {
-    if (!user) return
+    if (!user) return;
 
-    const purchasedItems = shoppingLists.filter(item => item.is_purchased)
-    console.log('Clearing purchased items:', purchasedItems.length) // デバッグ用
-    
+    const purchasedItems = shoppingLists.filter(item => item.is_purchased);
+    console.log('Clearing purchased items:', purchasedItems.length); // デバッグ用
+
     try {
       await Promise.all(
         purchasedItems.map(item =>
@@ -161,22 +171,22 @@ export default function ShoppingListManager({
             method: 'DELETE',
           })
         )
-      )
-      console.log('Bulk delete successful, calling onRefresh') // デバッグ用
+      );
+      console.log('Bulk delete successful, calling onRefresh'); // デバッグ用
       if (onRefresh) {
-        onRefresh()
+        onRefresh();
       }
     } catch (error) {
-      console.error('購入済みアイテムの削除に失敗しました:', error)
+      console.error('購入済みアイテムの削除に失敗しました:', error);
     }
-  }
+  };
 
   if (loading) {
-    return <div className="text-center">読み込み中...</div>
+    return <div className="text-center">読み込み中...</div>;
   }
 
-  const unpurchasedItems = shoppingLists.filter(item => !item.is_purchased)
-  const purchasedItems = shoppingLists.filter(item => item.is_purchased)
+  const unpurchasedItems = shoppingLists.filter(item => !item.is_purchased);
+  const purchasedItems = shoppingLists.filter(item => item.is_purchased);
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -196,9 +206,12 @@ export default function ShoppingListManager({
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>購入済みアイテムを削除しますか？</AlertDialogTitle>
+                  <AlertDialogTitle>
+                    購入済みアイテムを削除しますか？
+                  </AlertDialogTitle>
                   <AlertDialogDescription>
-                    購入済みの{purchasedItems.length}個のアイテムをすべて削除します。この操作は取り消せません。
+                    購入済みの{purchasedItems.length}
+                    個のアイテムをすべて削除します。この操作は取り消せません。
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -242,7 +255,12 @@ export default function ShoppingListManager({
                   required
                   ref={nameInputRef}
                   value={formData.ingredient_name}
-                  onChange={(e) => setFormData({ ...formData, ingredient_name: e.target.value })}
+                  onChange={e =>
+                    setFormData({
+                      ...formData,
+                      ingredient_name: e.target.value,
+                    })
+                  }
                   className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 bg-white"
                 />
               </div>
@@ -253,7 +271,9 @@ export default function ShoppingListManager({
                 <input
                   type="text"
                   value={formData.quantity}
-                  onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
+                  onChange={e =>
+                    setFormData({ ...formData, quantity: e.target.value })
+                  }
                   className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 bg-white"
                 />
               </div>
@@ -264,7 +284,9 @@ export default function ShoppingListManager({
                 <input
                   type="text"
                   value={formData.unit}
-                  onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
+                  onChange={e =>
+                    setFormData({ ...formData, unit: e.target.value })
+                  }
                   className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 bg-white"
                 />
               </div>
@@ -276,7 +298,12 @@ export default function ShoppingListManager({
                 </label>
                 <select
                   value={formData.priority}
-                  onChange={(e) => setFormData({ ...formData, priority: parseInt(e.target.value) })}
+                  onChange={e =>
+                    setFormData({
+                      ...formData,
+                      priority: parseInt(e.target.value),
+                    })
+                  }
                   className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 bg-white"
                 >
                   <option value={1}>低</option>
@@ -291,7 +318,9 @@ export default function ShoppingListManager({
                 <input
                   type="text"
                   value={formData.notes}
-                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  onChange={e =>
+                    setFormData({ ...formData, notes: e.target.value })
+                  }
                   className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 bg-white"
                 />
               </div>
@@ -326,7 +355,7 @@ export default function ShoppingListManager({
             </h3>
           </div>
           <div className="divide-y divide-gray-200">
-            {unpurchasedItems.map((item) => (
+            {unpurchasedItems.map(item => (
               <ShoppingListItem
                 key={item.id}
                 item={item}
@@ -347,7 +376,7 @@ export default function ShoppingListManager({
             </h3>
           </div>
           <div className="divide-y divide-gray-200">
-            {purchasedItems.map((item) => (
+            {purchasedItems.map(item => (
               <ShoppingListItem
                 key={item.id}
                 item={item}
@@ -363,7 +392,9 @@ export default function ShoppingListManager({
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-8 sm:py-12">
             <ShoppingCart className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mb-3 sm:mb-4" />
-            <h3 className="text-base sm:text-lg font-medium mb-2">買い物リストが空です</h3>
+            <h3 className="text-base sm:text-lg font-medium mb-2">
+              買い物リストが空です
+            </h3>
             <p className="text-sm text-muted-foreground text-center mb-4 max-w-lg">
               最初のアイテムを追加して、買い物リストを作成しましょう。
             </p>
@@ -378,40 +409,42 @@ export default function ShoppingListManager({
         </Card>
       )}
     </div>
-  )
+  );
 }
 
 interface ShoppingListItemProps {
-  item: ShoppingList
-  onToggle: (id: string, isPurchased: boolean) => void
-  onDelete: (id: string) => void
+  item: ShoppingList;
+  onToggle: (id: string, isPurchased: boolean) => void;
+  onDelete: (id: string) => void;
 }
 
 function ShoppingListItem({ item, onToggle, onDelete }: ShoppingListItemProps) {
   const getPriorityColor = (priority: number) => {
     switch (priority) {
       case 3:
-        return 'text-red-600'
+        return 'text-red-600';
       case 2:
-        return 'text-yellow-600'
+        return 'text-yellow-600';
       default:
-        return 'text-green-600'
+        return 'text-green-600';
     }
-  }
+  };
 
   const getPriorityText = (priority: number) => {
     switch (priority) {
       case 3:
-        return '高'
+        return '高';
       case 2:
-        return '中'
+        return '中';
       default:
-        return '低'
+        return '低';
     }
-  }
+  };
 
   return (
-    <div className={`p-4 flex items-center space-x-4 ${item.is_purchased ? 'opacity-60' : ''}`}>
+    <div
+      className={`p-4 flex items-center space-x-4 ${item.is_purchased ? 'opacity-60' : ''}`}
+    >
       <Button
         variant="ghost"
         size="sm"
@@ -424,9 +457,11 @@ function ShoppingListItem({ item, onToggle, onDelete }: ShoppingListItemProps) {
       >
         {item.is_purchased && <span className="text-sm">✓</span>}
       </Button>
-      
+
       <div className="flex-1">
-        <div className={`font-medium ${item.is_purchased ? 'line-through text-gray-500' : 'text-gray-900'}`}>
+        <div
+          className={`font-medium ${item.is_purchased ? 'line-through text-gray-500' : 'text-gray-900'}`}
+        >
           {item.ingredient_name}
           {item.quantity && item.unit && (
             <span className="text-sm text-gray-500 ml-2">
@@ -441,10 +476,14 @@ function ShoppingListItem({ item, onToggle, onDelete }: ShoppingListItemProps) {
           {item.notes && <span>• {item.notes}</span>}
         </div>
       </div>
-      
+
       <AlertDialog>
         <AlertDialogTrigger asChild>
-          <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-500 hover:bg-red-50">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-red-600 hover:text-red-500 hover:bg-red-50"
+          >
             <Trash2 className="w-4 h-4" />
           </Button>
         </AlertDialogTrigger>
@@ -467,5 +506,5 @@ function ShoppingListItem({ item, onToggle, onDelete }: ShoppingListItemProps) {
         </AlertDialogContent>
       </AlertDialog>
     </div>
-  )
-} 
+  );
+}

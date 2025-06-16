@@ -1,175 +1,215 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import Image from 'next/image'
-import { useAuth } from '@/hooks/useAuth'
-import { YouTubeVideo, Ingredient } from '@/lib/supabase'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Label } from '@/components/ui/label'
-import { Separator } from '@/components/ui/separator'
-import { Badge } from '@/components/ui/badge'
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { AspectRatio } from '@/components/ui/aspect-ratio'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Search, Utensils, Clock, Users, Star, ExternalLink, AlertCircle, Eye, FileText } from 'lucide-react'
+import { useState, useEffect } from 'react';
+import Image from 'next/image';
+import { useAuth } from '@/hooks/useAuth';
+import { YouTubeVideo, Ingredient } from '@/lib/supabase';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  Search,
+  Utensils,
+  Clock,
+  Users,
+  Star,
+  ExternalLink,
+  AlertCircle,
+  Eye,
+  FileText,
+} from 'lucide-react';
 
 interface RecipeSearchProps {
-  ingredients: Ingredient[]
-  onFavoriteChange?: () => void
+  ingredients: Ingredient[];
+  onFavoriteChange?: () => void;
 }
 
 // sessionStorageのキー（コンポーネント外で定義）
 const STORAGE_KEYS = {
   searchQuery: 'recipeSearch_query',
   videos: 'recipeSearch_videos',
-  selectedIngredients: 'recipeSearch_selectedIngredients'
-} as const
+  selectedIngredients: 'recipeSearch_selectedIngredients',
+} as const;
 
-export default function RecipeSearch({ ingredients, onFavoriteChange }: RecipeSearchProps) {
-  const [searchQuery, setSearchQuery] = useState('')
-  const [videos, setVideos] = useState<YouTubeVideo[]>([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  
+export default function RecipeSearch({
+  ingredients,
+  onFavoriteChange,
+}: RecipeSearchProps) {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [videos, setVideos] = useState<YouTubeVideo[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
   // 選択された材料のIDを管理
-  const [selectedIngredientIds, setSelectedIngredientIds] = useState<string[]>([])
+  const [selectedIngredientIds, setSelectedIngredientIds] = useState<string[]>(
+    []
+  );
 
   // コンポーネントマウント時にsessionStorageから状態を復元
   useEffect(() => {
     try {
-      const savedQuery = sessionStorage.getItem(STORAGE_KEYS.searchQuery)
-      const savedVideos = sessionStorage.getItem(STORAGE_KEYS.videos)
-      const savedSelectedIngredients = sessionStorage.getItem(STORAGE_KEYS.selectedIngredients)
+      const savedQuery = sessionStorage.getItem(STORAGE_KEYS.searchQuery);
+      const savedVideos = sessionStorage.getItem(STORAGE_KEYS.videos);
+      const savedSelectedIngredients = sessionStorage.getItem(
+        STORAGE_KEYS.selectedIngredients
+      );
 
       if (savedQuery) {
-        setSearchQuery(savedQuery)
+        setSearchQuery(savedQuery);
       }
 
       if (savedVideos) {
-        const parsedVideos = JSON.parse(savedVideos)
-        setVideos(parsedVideos)
+        const parsedVideos = JSON.parse(savedVideos);
+        setVideos(parsedVideos);
       }
 
       if (savedSelectedIngredients) {
-        const parsedSelectedIngredients = JSON.parse(savedSelectedIngredients)
-        setSelectedIngredientIds(parsedSelectedIngredients)
+        const parsedSelectedIngredients = JSON.parse(savedSelectedIngredients);
+        setSelectedIngredientIds(parsedSelectedIngredients);
       }
     } catch (error) {
-      console.error('Failed to restore search state from sessionStorage:', error)
+      console.error(
+        'Failed to restore search state from sessionStorage:',
+        error
+      );
     }
-  }, [])
+  }, []);
 
   // 検索クエリが変更された時にsessionStorageに保存
   useEffect(() => {
-    sessionStorage.setItem(STORAGE_KEYS.searchQuery, searchQuery)
-  }, [searchQuery])
+    sessionStorage.setItem(STORAGE_KEYS.searchQuery, searchQuery);
+  }, [searchQuery]);
 
   // 検索結果が変更された時にsessionStorageに保存
   useEffect(() => {
-    sessionStorage.setItem(STORAGE_KEYS.videos, JSON.stringify(videos))
-  }, [videos])
+    sessionStorage.setItem(STORAGE_KEYS.videos, JSON.stringify(videos));
+  }, [videos]);
 
   // 選択された材料が変更された時にsessionStorageに保存
   useEffect(() => {
-    sessionStorage.setItem(STORAGE_KEYS.selectedIngredients, JSON.stringify(selectedIngredientIds))
-  }, [selectedIngredientIds])
+    sessionStorage.setItem(
+      STORAGE_KEYS.selectedIngredients,
+      JSON.stringify(selectedIngredientIds)
+    );
+  }, [selectedIngredientIds]);
 
   // 材料の選択/非選択を切り替え
   const toggleIngredientSelection = (ingredientId: string) => {
-    setSelectedIngredientIds(prev => 
+    setSelectedIngredientIds(prev =>
       prev.includes(ingredientId)
         ? prev.filter(id => id !== ingredientId)
         : [...prev, ingredientId]
-    )
-  }
+    );
+  };
 
   // 全選択/全解除を切り替え
   const toggleSelectAll = () => {
     if (selectedIngredientIds.length === ingredients.length) {
       // 全て選択されている場合は全解除
-      setSelectedIngredientIds([])
+      setSelectedIngredientIds([]);
     } else {
       // 一部または何も選択されていない場合は全選択
-      setSelectedIngredientIds(ingredients.map(ing => ing.id))
+      setSelectedIngredientIds(ingredients.map(ing => ing.id));
     }
-  }
+  };
 
   // 選択された材料を取得
   const getSelectedIngredients = () => {
-    return ingredients.filter(ing => selectedIngredientIds.includes(ing.id))
-  }
+    return ingredients.filter(ing => selectedIngredientIds.includes(ing.id));
+  };
 
   // レシピ検索（選択した材料と検索キーワードを組み合わせ）
   const searchRecipes = async (query: string) => {
-    setLoading(true)
-    setError('')
+    setLoading(true);
+    setError('');
 
     try {
       // 選択された材料名を取得
-      const selectedIngredients = getSelectedIngredients()
-      const ingredientNames = selectedIngredients.map(ing => ing.name)
-      
+      const selectedIngredients = getSelectedIngredients();
+      const ingredientNames = selectedIngredients.map(ing => ing.name);
+
       // 検索クエリと選択した材料を組み合わせ
-      const searchTerms = []
+      const searchTerms = [];
       if (query.trim()) {
-        searchTerms.push(query.trim())
+        searchTerms.push(query.trim());
       }
       if (ingredientNames.length > 0) {
-        searchTerms.push(...ingredientNames)
-      }
-      
-      const finalQuery = searchTerms.join(' ')
-      
-      if (!finalQuery) {
-        setError('検索キーワードまたは材料を選択してください')
-        return
+        searchTerms.push(...ingredientNames);
       }
 
-      const response = await fetch(`/api/youtube/search?q=${encodeURIComponent(finalQuery)}`)
-      const data = await response.json()
+      const finalQuery = searchTerms.join(' ');
+
+      if (!finalQuery) {
+        setError('検索キーワードまたは材料を選択してください');
+        return;
+      }
+
+      const response = await fetch(
+        `/api/youtube/search?q=${encodeURIComponent(finalQuery)}`
+      );
+      const data = await response.json();
 
       if (response.ok) {
-        setVideos(data.videos || [])
+        setVideos(data.videos || []);
       } else {
-        setError(data.error || '検索に失敗しました')
+        setError(data.error || '検索に失敗しました');
       }
     } catch {
-      setError('検索に失敗しました')
+      setError('検索に失敗しました');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   // フォーム送信
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    searchRecipes(searchQuery)
-  }
+    e.preventDefault();
+    searchRecipes(searchQuery);
+  };
 
   // 統一されたアイテムクリックハンドラー
   const handleItemClick = (e: React.MouseEvent, action: () => void) => {
-    e.preventDefault()
-    e.stopPropagation()
-    action()
-  }
+    e.preventDefault();
+    e.stopPropagation();
+    action();
+  };
 
   // 統一されたキーボードハンドラー
   const handleItemKeyDown = (e: React.KeyboardEvent, action: () => void) => {
     if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault()
-      e.stopPropagation()
-      action()
+      e.preventDefault();
+      e.stopPropagation();
+      action();
     }
-  }
+  };
 
   // 全選択の状態を判定
-  const isAllSelected = ingredients.length > 0 && selectedIngredientIds.length === ingredients.length
-  const isPartiallySelected = selectedIngredientIds.length > 0 && selectedIngredientIds.length < ingredients.length
+  const isAllSelected =
+    ingredients.length > 0 &&
+    selectedIngredientIds.length === ingredients.length;
+  const isPartiallySelected =
+    selectedIngredientIds.length > 0 &&
+    selectedIngredientIds.length < ingredients.length;
 
   return (
     <main className="space-y-4 sm:space-y-6" role="main">
@@ -186,7 +226,12 @@ export default function RecipeSearch({ ingredients, onFavoriteChange }: RecipeSe
         <Card>
           <CardContent className="space-y-6">
             {/* 検索フォーム */}
-            <form onSubmit={handleSubmit} className="flex gap-3" role="search" aria-label="レシピ検索フォーム">
+            <form
+              onSubmit={handleSubmit}
+              className="flex gap-3"
+              role="search"
+              aria-label="レシピ検索フォーム"
+            >
               <div className="flex-1">
                 <Label htmlFor="search-input" className="sr-only">
                   レシピ検索キーワード
@@ -195,7 +240,7 @@ export default function RecipeSearch({ ingredients, onFavoriteChange }: RecipeSe
                   id="search-input"
                   type="text"
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={e => setSearchQuery(e.target.value)}
                   placeholder="例：和食、洋食、中華、イタリアン..."
                   className="flex-1 focus:border-green-400 focus:ring-green-300"
                   aria-describedby="search-help"
@@ -205,15 +250,17 @@ export default function RecipeSearch({ ingredients, onFavoriteChange }: RecipeSe
                   料理のジャンルを入力してレシピを検索できます。選択した材料と組み合わせて検索されます。
                 </div>
               </div>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={loading}
-                aria-describedby={loading ? "search-status" : undefined}
+                aria-describedby={loading ? 'search-status' : undefined}
                 className="bg-green-600 hover:bg-green-700"
               >
                 {loading ? (
                   <>
-                    <span className="sr-only">検索中です。しばらくお待ちください。</span>
+                    <span className="sr-only">
+                      検索中です。しばらくお待ちください。
+                    </span>
                     検索中...
                   </>
                 ) : (
@@ -241,11 +288,16 @@ export default function RecipeSearch({ ingredients, onFavoriteChange }: RecipeSe
                     <AccordionItem value="ingredients">
                       <AccordionTrigger aria-describedby="ingredient-selection-help">
                         <div className="flex items-center gap-2">
-                          <Utensils className="h-4 w-4 text-green-600" aria-hidden="true" />
-                          <span id="ingredients-heading">使用する材料を選択</span>
+                          <Utensils
+                            className="h-4 w-4 text-green-600"
+                            aria-hidden="true"
+                          />
+                          <span id="ingredients-heading">
+                            使用する材料を選択
+                          </span>
                           {selectedIngredientIds.length > 0 && (
-                            <Badge 
-                              variant="secondary" 
+                            <Badge
+                              variant="secondary"
                               className="ml-2 bg-green-100 text-green-700 border-green-200"
                               aria-label={`${selectedIngredientIds.length}個の材料が選択されています`}
                             >
@@ -261,19 +313,27 @@ export default function RecipeSearch({ ingredients, onFavoriteChange }: RecipeSe
                         <div className="space-y-4">
                           {/* 材料選択リスト */}
                           <fieldset>
-                            <legend className="sr-only">使用する材料を選択してください</legend>
-                            <div 
+                            <legend className="sr-only">
+                              使用する材料を選択してください
+                            </legend>
+                            <div
                               className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 px-2"
                               role="group"
                               aria-labelledby="ingredients-heading"
                             >
                               {/* 全選択項目 */}
-                              <div 
+                              <div
                                 className={`col-span-full flex items-center space-x-2 p-3 border rounded-lg hover:bg-gray-50 cursor-pointer focus-within:ring-2 focus-within:ring-green-500 focus-within:ring-offset-2 ${
-                                  isAllSelected ? 'border-green-400 bg-green-50' : 'border-gray-200 hover:border-green-300'
+                                  isAllSelected
+                                    ? 'border-green-400 bg-green-50'
+                                    : 'border-gray-200 hover:border-green-300'
                                 }`}
-                                onClick={(e) => handleItemClick(e, () => toggleSelectAll())}
-                                onKeyDown={(e) => handleItemKeyDown(e, toggleSelectAll)}
+                                onClick={e =>
+                                  handleItemClick(e, () => toggleSelectAll())
+                                }
+                                onKeyDown={e =>
+                                  handleItemKeyDown(e, toggleSelectAll)
+                                }
                                 tabIndex={0}
                                 role="button"
                                 aria-pressed={isAllSelected}
@@ -282,11 +342,12 @@ export default function RecipeSearch({ ingredients, onFavoriteChange }: RecipeSe
                                 <Checkbox
                                   id="select-all"
                                   checked={isAllSelected}
-                                  ref={(el) => {
+                                  ref={el => {
                                     if (el) {
-                                      const input = el.querySelector('input')
+                                      const input = el.querySelector('input');
                                       if (input) {
-                                        input.indeterminate = isPartiallySelected
+                                        input.indeterminate =
+                                          isPartiallySelected;
                                       }
                                     }
                                   }}
@@ -300,21 +361,33 @@ export default function RecipeSearch({ ingredients, onFavoriteChange }: RecipeSe
                                   すべて選択
                                 </Label>
                                 <div id="select-all-desc" className="sr-only">
-                                  すべての材料を{isAllSelected ? '選択解除' : '選択'}する
+                                  すべての材料を
+                                  {isAllSelected ? '選択解除' : '選択'}する
                                 </div>
                               </div>
 
                               {/* 個別材料項目 */}
-                              {ingredients.map((ingredient) => {
-                                const isSelected = selectedIngredientIds.includes(ingredient.id)
+                              {ingredients.map(ingredient => {
+                                const isSelected =
+                                  selectedIngredientIds.includes(ingredient.id);
                                 return (
-                                  <div 
-                                    key={ingredient.id} 
+                                  <div
+                                    key={ingredient.id}
                                     className={`flex items-center space-x-2 p-3 border rounded-lg hover:bg-gray-50 cursor-pointer focus-within:ring-2 focus-within:ring-green-500 focus-within:ring-offset-2 ${
-                                      isSelected ? 'border-green-400 bg-green-50' : 'border-gray-200 hover:border-green-300'
+                                      isSelected
+                                        ? 'border-green-400 bg-green-50'
+                                        : 'border-gray-200 hover:border-green-300'
                                     }`}
-                                    onClick={(e) => handleItemClick(e, () => toggleIngredientSelection(ingredient.id))}
-                                    onKeyDown={(e) => handleItemKeyDown(e, () => toggleIngredientSelection(ingredient.id))}
+                                    onClick={e =>
+                                      handleItemClick(e, () =>
+                                        toggleIngredientSelection(ingredient.id)
+                                      )
+                                    }
+                                    onKeyDown={e =>
+                                      handleItemKeyDown(e, () =>
+                                        toggleIngredientSelection(ingredient.id)
+                                      )
+                                    }
                                     tabIndex={0}
                                     role="button"
                                     aria-pressed={isSelected}
@@ -332,11 +405,15 @@ export default function RecipeSearch({ ingredients, onFavoriteChange }: RecipeSe
                                     >
                                       {ingredient.name}
                                     </Label>
-                                    <div id={`ingredient-${ingredient.id}-desc`} className="sr-only">
-                                      {ingredient.name}を{isSelected ? '選択解除' : '選択'}する
+                                    <div
+                                      id={`ingredient-${ingredient.id}-desc`}
+                                      className="sr-only"
+                                    >
+                                      {ingredient.name}を
+                                      {isSelected ? '選択解除' : '選択'}する
                                     </div>
                                   </div>
-                                )
+                                );
                               })}
                             </div>
                           </fieldset>
@@ -367,25 +444,35 @@ export default function RecipeSearch({ ingredients, onFavoriteChange }: RecipeSe
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle id="results-heading" className="flex items-center gap-2">
-                  <Users className="h-5 w-5 text-green-600" aria-hidden="true" />
+                <CardTitle
+                  id="results-heading"
+                  className="flex items-center gap-2"
+                >
+                  <Users
+                    className="h-5 w-5 text-green-600"
+                    aria-hidden="true"
+                  />
                   検索結果
                 </CardTitle>
-                <Badge variant="secondary" className="bg-green-100 text-green-700 border-green-200" aria-label={`${videos.length}件の検索結果が見つかりました`}>
+                <Badge
+                  variant="secondary"
+                  className="bg-green-100 text-green-700 border-green-200"
+                  aria-label={`${videos.length}件の検索結果が見つかりました`}
+                >
                   {videos.length}件見つかりました
                 </Badge>
               </div>
             </CardHeader>
             <CardContent>
-              <div 
+              <div
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
                 role="list"
                 aria-label="レシピ動画一覧"
               >
                 {videos.map((video, index) => (
                   <div key={video.videoId} role="listitem">
-                    <VideoCard 
-                      video={video} 
+                    <VideoCard
+                      video={video}
                       onFavoriteChange={onFavoriteChange}
                       index={index + 1}
                       totalCount={videos.length}
@@ -413,38 +500,46 @@ export default function RecipeSearch({ ingredients, onFavoriteChange }: RecipeSe
         </section>
       )}
     </main>
-  )
+  );
 }
 
 interface VideoCardProps {
-  video: YouTubeVideo
-  onFavoriteChange?: () => void
-  index?: number
-  totalCount?: number
+  video: YouTubeVideo;
+  onFavoriteChange?: () => void;
+  index?: number;
+  totalCount?: number;
 }
 
-function VideoCard({ video, onFavoriteChange, index, totalCount }: VideoCardProps) {
-  const [isFavorite, setIsFavorite] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [showDescription, setShowDescription] = useState(false)
-  const { user } = useAuth()
+function VideoCard({
+  video,
+  onFavoriteChange,
+  index,
+  totalCount,
+}: VideoCardProps) {
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [showDescription, setShowDescription] = useState(false);
+  const { user } = useAuth();
 
   // お気に入りに追加/削除
   const toggleFavorite = async () => {
-    if (!user) return
+    if (!user) return;
 
-    setLoading(true)
+    setLoading(true);
     try {
       if (isFavorite) {
         // お気に入りから削除
-        const response = await fetch(`/api/favorites?userId=${user.id}&videoId=${video.videoId}`, {
-          method: 'DELETE',
-        })
+        const response = await fetch(
+          `/api/favorites?userId=${user.id}&videoId=${video.videoId}`,
+          {
+            method: 'DELETE',
+          }
+        );
         if (response.ok) {
-          setIsFavorite(false)
+          setIsFavorite(false);
           // 親コンポーネントのお気に入りデータを更新
           if (onFavoriteChange) {
-            onFavoriteChange()
+            onFavoriteChange();
           }
         }
       } else {
@@ -465,46 +560,46 @@ function VideoCard({ video, onFavoriteChange, index, totalCount }: VideoCardProp
             view_count: video.viewCount,
             published_at: video.publishedAt,
           }),
-        })
+        });
         if (response.ok) {
-          setIsFavorite(true)
+          setIsFavorite(true);
           // 親コンポーネントのお気に入りデータを更新
           if (onFavoriteChange) {
-            onFavoriteChange()
+            onFavoriteChange();
           }
         }
       }
     } catch (error) {
-      console.error('お気に入り操作に失敗しました:', error)
+      console.error('お気に入り操作に失敗しました:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const formatDuration = (duration: string) => {
-    const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/)
-    if (!match) return duration
+    const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+    if (!match) return duration;
 
-    const hours = parseInt(match[1] || '0')
-    const minutes = parseInt(match[2] || '0')
-    const seconds = parseInt(match[3] || '0')
+    const hours = parseInt(match[1] || '0');
+    const minutes = parseInt(match[2] || '0');
+    const seconds = parseInt(match[3] || '0');
 
     if (hours > 0) {
-      return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+      return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     }
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`
-  }
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
 
   const formatViewCount = (count: number) => {
     if (count >= 1000000) {
-      return `${(count / 1000000).toFixed(1)}M回再生`
+      return `${(count / 1000000).toFixed(1)}M回再生`;
     } else if (count >= 1000) {
-      return `${(count / 1000).toFixed(1)}K回再生`
+      return `${(count / 1000).toFixed(1)}K回再生`;
     }
-    return `${count}回再生`
-  }
+    return `${count}回再生`;
+  };
 
-  const cardAriaLabel = `${index && totalCount ? `${totalCount}件中${index}番目: ` : ''}${video.title}、チャンネル: ${video.channelName}、再生時間: ${formatDuration(video.duration)}、再生回数: ${formatViewCount(video.viewCount)}`
+  const cardAriaLabel = `${index && totalCount ? `${totalCount}件中${index}番目: ` : ''}${video.title}、チャンネル: ${video.channelName}、再生時間: ${formatDuration(video.duration)}、再生回数: ${formatViewCount(video.viewCount)}`;
 
   return (
     <Card className="overflow-hidden" role="article" aria-label={cardAriaLabel}>
@@ -520,8 +615,8 @@ function VideoCard({ video, onFavoriteChange, index, totalCount }: VideoCardProp
           />
         </AspectRatio>
         <div className="absolute bottom-2 right-2">
-          <Badge 
-            variant="secondary" 
+          <Badge
+            variant="secondary"
             className="bg-black/80 text-white"
             aria-label={`動画の長さ: ${formatDuration(video.duration)}`}
           >
@@ -530,7 +625,7 @@ function VideoCard({ video, onFavoriteChange, index, totalCount }: VideoCardProp
           </Badge>
         </div>
       </div>
-      
+
       <CardContent className="p-4 space-y-3">
         <div>
           <CardTitle className="text-base font-medium line-clamp-2 mb-2">
@@ -540,7 +635,7 @@ function VideoCard({ video, onFavoriteChange, index, totalCount }: VideoCardProp
             <span aria-label={`チャンネル名: ${video.channelName}`}>
               {video.channelName}
             </span>
-            <span 
+            <span
               className="flex items-center gap-1"
               aria-label={`再生回数: ${formatViewCount(video.viewCount)}`}
             >
@@ -549,11 +644,11 @@ function VideoCard({ video, onFavoriteChange, index, totalCount }: VideoCardProp
             </span>
           </div>
         </div>
-        
+
         <div className="flex gap-2" role="group" aria-label="動画アクション">
-          <Button 
-            asChild 
-            size="sm" 
+          <Button
+            asChild
+            size="sm"
             className="flex-1"
             aria-describedby={`youtube-link-${video.videoId}`}
           >
@@ -573,17 +668,24 @@ function VideoCard({ video, onFavoriteChange, index, totalCount }: VideoCardProp
           <Button
             onClick={toggleFavorite}
             disabled={loading}
-            variant={isFavorite ? "default" : "outline"}
+            variant={isFavorite ? 'default' : 'outline'}
             size="sm"
             aria-label={`${video.title}を${isFavorite ? 'お気に入りから削除' : 'お気に入りに追加'}する`}
             aria-pressed={isFavorite}
-            className={isFavorite ? 'bg-green-600 hover:bg-green-700' : 'hover:bg-green-50 hover:border-green-300 border-green-200'}
+            className={
+              isFavorite
+                ? 'bg-green-600 hover:bg-green-700'
+                : 'hover:bg-green-50 hover:border-green-300 border-green-200'
+            }
           >
             {loading ? (
               <span className="sr-only">処理中...</span>
             ) : (
               <>
-                <Star className={`h-3 w-3 ${isFavorite ? 'fill-current' : ''}`} aria-hidden="true" />
+                <Star
+                  className={`h-3 w-3 ${isFavorite ? 'fill-current' : ''}`}
+                  aria-hidden="true"
+                />
                 <span className="sr-only">
                   {isFavorite ? 'お気に入り済み' : 'お気に入りに追加'}
                 </span>
@@ -591,12 +693,12 @@ function VideoCard({ video, onFavoriteChange, index, totalCount }: VideoCardProp
             )}
           </Button>
         </div>
-        
+
         <Dialog open={showDescription} onOpenChange={setShowDescription}>
           <DialogTrigger asChild>
-            <Button 
-              variant="ghost" 
-              size="sm" 
+            <Button
+              variant="ghost"
+              size="sm"
               className="w-full justify-center hover:bg-green-50 transition-colors"
               aria-expanded={showDescription}
               aria-controls={`description-${video.videoId}`}
@@ -615,7 +717,9 @@ function VideoCard({ video, onFavoriteChange, index, totalCount }: VideoCardProp
                 {video.title}
               </DialogTitle>
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs sm:text-sm text-muted-foreground pt-2">
-                <span className="font-medium break-words">{video.channelName}</span>
+                <span className="font-medium break-words">
+                  {video.channelName}
+                </span>
                 <div className="flex items-center gap-3 sm:gap-4">
                   <span className="flex items-center gap-1">
                     <Clock className="h-3 w-3" />
@@ -628,7 +732,7 @@ function VideoCard({ video, onFavoriteChange, index, totalCount }: VideoCardProp
                 </div>
               </div>
             </DialogHeader>
-            
+
             {/* コンテンツ部分 */}
             <div className="flex-1 min-h-0 overflow-hidden">
               <ScrollArea className="h-full">
@@ -643,20 +747,24 @@ function VideoCard({ video, onFavoriteChange, index, totalCount }: VideoCardProp
                         className="flex items-center justify-center gap-2"
                       >
                         <ExternalLink className="h-4 w-4" />
-                        <span className="text-sm sm:text-base">YouTubeで視聴</span>
+                        <span className="text-sm sm:text-base">
+                          YouTubeで視聴
+                        </span>
                       </a>
                     </Button>
                     <Button
                       onClick={toggleFavorite}
                       disabled={loading}
-                      variant={isFavorite ? "default" : "outline"}
+                      variant={isFavorite ? 'default' : 'outline'}
                       className={`h-10 sm:h-11 min-w-[140px] rounded-xl ${
-                        isFavorite 
-                          ? 'bg-green-600 hover:bg-green-700' 
+                        isFavorite
+                          ? 'bg-green-600 hover:bg-green-700'
                           : 'hover:bg-green-50 hover:border-green-300 border-green-200'
                       }`}
                     >
-                      <Star className={`h-4 w-4 mr-2 ${isFavorite ? 'fill-current' : ''}`} />
+                      <Star
+                        className={`h-4 w-4 mr-2 ${isFavorite ? 'fill-current' : ''}`}
+                      />
                       <span className="text-sm sm:text-base">
                         {isFavorite ? 'お気に入り済み' : 'お気に入りに追加'}
                       </span>
@@ -683,7 +791,9 @@ function VideoCard({ video, onFavoriteChange, index, totalCount }: VideoCardProp
                       <div className="border rounded-2xl p-8 bg-gradient-to-br from-gray-50 to-white flex items-center justify-center h-[150px] shadow-inner">
                         <div className="text-center space-y-2">
                           <FileText className="h-8 w-8 text-gray-400 mx-auto" />
-                          <p className="text-sm text-muted-foreground">説明文がありません</p>
+                          <p className="text-sm text-muted-foreground">
+                            説明文がありません
+                          </p>
                         </div>
                       </div>
                     )}
@@ -695,5 +805,5 @@ function VideoCard({ video, onFavoriteChange, index, totalCount }: VideoCardProp
         </Dialog>
       </CardContent>
     </Card>
-  )
-} 
+  );
+}

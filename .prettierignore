@@ -1,0 +1,17 @@
+node_modules
+.next
+.vercel
+dist
+build
+.cache
+public
+.env*
+*.log
+.DS_Store
+coverage
+.nyc_output
+*.tsbuildinfo
+next-env.d.ts
+package-lock.json
+pnpm-lock.yaml
+yarn.lock 

@@ -1,10 +1,10 @@
-'use client'
+'use client';
 
-import Image from 'next/image'
-import { useAuth } from '@/hooks/useAuth'
-import { FavoriteRecipe } from '@/lib/supabase'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
+import Image from 'next/image';
+import { useAuth } from '@/hooks/useAuth';
+import { FavoriteRecipe } from '@/lib/supabase';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,53 +15,50 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
-import { 
-  Heart, 
-  Clock, 
-  Trash2,
-  Loader2,
-  Search
-} from 'lucide-react'
+} from '@/components/ui/alert-dialog';
+import { Heart, Clock, Trash2, Loader2, Search } from 'lucide-react';
 
 interface FavoriteRecipesManagerProps {
-  favorites?: FavoriteRecipe[]
-  loading?: boolean
-  onRefresh?: () => void
-  onTabChange?: (tab: string) => void
+  favorites?: FavoriteRecipe[];
+  loading?: boolean;
+  onRefresh?: () => void;
+  onTabChange?: (tab: string) => void;
 }
 
-export default function FavoriteRecipesManager({ 
-  favorites = [], 
-  loading = false, 
+export default function FavoriteRecipesManager({
+  favorites = [],
+  loading = false,
   onRefresh,
-  onTabChange
+  onTabChange,
 }: FavoriteRecipesManagerProps = {}) {
-  const { user } = useAuth()
+  const { user } = useAuth();
 
   const removeFavorite = async (videoId: string) => {
-    if (!user) return
+    if (!user) return;
 
-    console.log('Removing favorite:', videoId) // デバッグ用
+    console.log('Removing favorite:', videoId); // デバッグ用
     try {
-      const response = await fetch(`/api/favorites?userId=${user.id}&videoId=${videoId}`, {
-        method: 'DELETE',
-      })
+      const response = await fetch(
+        `/api/favorites?userId=${user.id}&videoId=${videoId}`,
+        {
+          method: 'DELETE',
+        }
+      );
 
-      console.log('Delete response status:', response.status) // デバッグ用
+      console.log('Delete response status:', response.status); // デバッグ用
       if (response.ok) {
-        console.log('Delete successful, calling onRefresh') // デバッグ用
+        console.log('Delete successful, calling onRefresh'); // デバッグ用
         // データを強制的に再取得する
         if (onRefresh) {
-          onRefresh()
+          onRefresh();
         }
       } else {
-        console.error('お気に入りの削除に失敗しました:', response.status)
+        console.error('お気に入りの削除に失敗しました:', response.status);
       }
     } catch (error) {
-      console.error('お気に入りの削除に失敗しました:', error)
+      console.error('お気に入りの削除に失敗しました:', error);
     }
-  }
+  };
 
   if (loading) {
     return (
@@ -73,7 +70,7 @@ export default function FavoriteRecipesManager({
           </div>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
@@ -85,16 +82,18 @@ export default function FavoriteRecipesManager({
           <h2 className="text-xl sm:text-2xl font-bold">お気に入りレシピ</h2>
         </div>
       </div>
-      
+
       {favorites.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-8 sm:py-12">
             <Heart className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mb-3 sm:mb-4" />
-            <h3 className="text-base sm:text-lg font-medium mb-2">お気に入りレシピがありません</h3>
+            <h3 className="text-base sm:text-lg font-medium mb-2">
+              お気に入りレシピがありません
+            </h3>
             <p className="text-sm text-muted-foreground text-center mb-4 max-w-lg">
               レシピ検索でお気に入りのレシピを見つけて、ハートボタンで保存しましょう
             </p>
-            <Button 
+            <Button
               onClick={() => onTabChange?.('recipes')}
               className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-sm"
             >
@@ -106,7 +105,10 @@ export default function FavoriteRecipesManager({
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {favorites.map((favorite: FavoriteRecipe) => (
-            <Card key={favorite.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+            <Card
+              key={favorite.id}
+              className="overflow-hidden hover:shadow-lg transition-shadow"
+            >
               <div className="relative">
                 <Image
                   src={favorite.thumbnail_url || '/placeholder-recipe.jpg'}
@@ -122,7 +124,7 @@ export default function FavoriteRecipesManager({
                   {favorite.duration}
                 </div>
               </div>
-              
+
               <CardContent className="p-3 sm:p-4">
                 <h3 className="font-medium text-sm sm:text-base mb-2 line-clamp-2 h-8 sm:h-10">
                   {favorite.title}
@@ -130,7 +132,7 @@ export default function FavoriteRecipesManager({
                 <p className="text-xs sm:text-sm text-muted-foreground mb-3">
                   {favorite.channel_name}
                 </p>
-                
+
                 <div className="flex justify-between items-center">
                   <a
                     href={`https://youtube.com/watch?v=${favorite.youtube_video_id}`}
@@ -140,11 +142,11 @@ export default function FavoriteRecipesManager({
                   >
                     YouTubeで見る
                   </a>
-                  
+
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button 
-                        variant="ghost" 
+                      <Button
+                        variant="ghost"
                         size="sm"
                         className="h-8 w-8 p-0 hover:bg-red-100 text-red-600"
                       >
@@ -153,15 +155,20 @@ export default function FavoriteRecipesManager({
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>お気に入りから削除しますか？</AlertDialogTitle>
+                        <AlertDialogTitle>
+                          お気に入りから削除しますか？
+                        </AlertDialogTitle>
                         <AlertDialogDescription>
-                          「{favorite.title}」をお気に入りから削除します。この操作は取り消せません。
+                          「{favorite.title}
+                          」をお気に入りから削除します。この操作は取り消せません。
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>キャンセル</AlertDialogCancel>
                         <AlertDialogAction
-                          onClick={() => removeFavorite(favorite.youtube_video_id)}
+                          onClick={() =>
+                            removeFavorite(favorite.youtube_video_id)
+                          }
                           className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
                         >
                           削除
@@ -176,5 +183,5 @@ export default function FavoriteRecipesManager({
         </div>
       )}
     </div>
-  )
-} 
+  );
+}

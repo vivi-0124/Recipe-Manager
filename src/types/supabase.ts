@@ -4,13 +4,13 @@ export type Json =
   | boolean
   | null
   | { [key: string]: Json | undefined }
-  | Json[]
+  | Json[];
 
 export interface Database {
   public: {
-    Tables: Record<string, unknown>
-    Views: Record<string, unknown>
-    Functions: Record<string, unknown>
-    Enums: Record<string, unknown>
-  }
-} 
+    Tables: Record<string, unknown>;
+    Views: Record<string, unknown>;
+    Functions: Record<string, unknown>;
+    Enums: Record<string, unknown>;
+  };
+}
