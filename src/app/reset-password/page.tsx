@@ -3,6 +3,25 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  ChefHat,
+  Lock,
+  Loader2,
+  AlertCircle,
+  CheckCircle,
+  ArrowLeft,
+} from 'lucide-react';
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState('');
@@ -67,86 +86,114 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            パスワードをリセット
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            新しいパスワードを入力してください
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 p-3 sm:p-4">
+      <div className="w-full max-w-sm sm:max-w-md">
+        {/* ロゴ部分 - AuthFormと統一 */}
+        <div className="flex flex-col items-center mb-6 sm:mb-8">
+          <div className="mb-3 sm:mb-4 p-2.5 sm:p-3 bg-white rounded-full shadow-lg">
+            <ChefHat className="h-10 w-10 sm:h-12 sm:w-12 text-orange-500" />
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent text-center">
+            レシピ管理アプリ
+          </h1>
+          <p className="text-sm sm:text-base text-muted-foreground text-center mt-1 sm:mt-2">
+            美味しい料理を、いつでも簡単に
           </p>
         </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700"
+        <Card className="shadow-xl border-0 bg-white/80 backdrop-blur">
+          <CardHeader className="text-center pb-4 sm:pb-6">
+            <CardTitle className="text-lg sm:text-xl">
+              パスワードリセット
+            </CardTitle>
+            <CardDescription className="text-sm">
+              新しいパスワードを設定してください
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="px-4 sm:px-6">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* 新しいパスワード */}
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-sm">
+                  新しいパスワード
+                </Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="新しいパスワードを入力"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    className="pl-10 text-base sm:text-sm h-11 sm:h-10"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* パスワード確認 */}
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword" className="text-sm">
+                  パスワード確認
+                </Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    placeholder="パスワードを再入力"
+                    value={confirmPassword}
+                    onChange={e => setConfirmPassword(e.target.value)}
+                    className="pl-10 text-base sm:text-sm h-11 sm:h-10"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* エラー・成功メッセージ */}
+              {error && (
+                <Alert variant="destructive" className="text-sm">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+
+              {message && (
+                <Alert className="border-green-200 bg-green-50 text-green-800 text-sm">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <AlertDescription>{message}</AlertDescription>
+                </Alert>
+              )}
+
+              {/* 更新ボタン */}
+              <Button
+                type="submit"
+                className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 h-11 sm:h-10 text-base sm:text-sm font-medium"
+                disabled={loading}
               >
-                新しいパスワード
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 bg-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="新しいパスワード"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-              />
-            </div>
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    更新中...
+                  </>
+                ) : (
+                  'パスワードを更新'
+                )}
+              </Button>
 
-            <div>
-              <label
-                htmlFor="confirmPassword"
-                className="block text-sm font-medium text-gray-700"
+              {/* ホームに戻るボタン */}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.push('/')}
+                className="w-full h-11 sm:h-10 text-base sm:text-sm"
               >
-                パスワード確認
-              </label>
-              <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                required
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 bg-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="パスワードを再入力"
-                value={confirmPassword}
-                onChange={e => setConfirmPassword(e.target.value)}
-              />
-            </div>
-          </div>
-
-          {error && (
-            <div className="text-red-600 text-sm text-center">{error}</div>
-          )}
-
-          {message && (
-            <div className="text-green-600 text-sm text-center">{message}</div>
-          )}
-
-          <div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-            >
-              {loading ? '更新中...' : 'パスワードを更新'}
-            </button>
-          </div>
-
-          <div className="text-center">
-            <button
-              type="button"
-              onClick={() => router.push('/')}
-              className="text-indigo-600 hover:text-indigo-500 text-sm"
-            >
-              ホームに戻る
-            </button>
-          </div>
-        </form>
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                ホームに戻る
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
