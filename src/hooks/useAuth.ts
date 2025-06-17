@@ -48,6 +48,28 @@ export const useAuth = () => {
     return { data, error }
   }
 
+  // Googleログイン
+  const signInWithGoogle = async () => {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/`,
+      },
+    })
+    return { data, error }
+  }
+
+  // マジックリンク認証（パスワードレス）
+  const signInWithMagicLink = async (email: string) => {
+    const { data, error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/`,
+      },
+    })
+    return { data, error }
+  }
+
   // サインアウト
   const signOut = async () => {
     const { error } = await supabase.auth.signOut()
@@ -74,6 +96,8 @@ export const useAuth = () => {
     loading,
     signUp,
     signIn,
+    signInWithGoogle,
+    signInWithMagicLink,
     signOut,
     resetPassword,
     updatePassword,
